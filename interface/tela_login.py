@@ -7,6 +7,16 @@ from interface import estilo
 LARGURA = 460
 ALTURA = 560
 
+# Cores do tema escuro do login.
+COR_FUNDO = estilo.COR_SIDEBAR
+COR_CAMPO = "#1F2937"
+COR_BORDA = "#374151"
+COR_TEXTO = "#F9FAFB"
+COR_ROTULO = "#9CA3AF"
+COR_BOTAO = "#FFFFFF"
+COR_BOTAO_HOVER = "#E5E7EB"
+COR_ERRO = "#F87171"
+
 
 class TelaLogin(ctk.CTkToplevel):
 
@@ -21,26 +31,24 @@ class TelaLogin(ctk.CTkToplevel):
         y = (self.winfo_screenheight() - ALTURA) // 2
         self.geometry(f"{LARGURA}x{ALTURA}+{x}+{max(y - 30, 0)}")
         self.resizable(False, False)
-        self.configure(fg_color=estilo.COR_CARD)
+        self.configure(fg_color=COR_FUNDO)
 
         self.protocol("WM_DELETE_WINDOW", master.destroy)
 
         conteudo = ctk.CTkFrame(self, fg_color="transparent")
-        conteudo.pack(expand=True, fill="both", padx=48, pady=56)
+        conteudo.pack(expand=True, fill="both", padx=48, pady=(48, 40))
 
-        ctk.CTkLabel(
-            conteudo,
-            text="Locadora",
-            font=(estilo.FONTE, 30, "bold"),
-            text_color=estilo.COR_TEXTO
-        ).pack(anchor="w")
+        self.logo = estilo.carregar_logo(largura=300)
 
-        ctk.CTkLabel(
-            conteudo,
-            text="Entre para continuar",
-            font=(estilo.FONTE, 14),
-            text_color=estilo.COR_SUAVE
-        ).pack(anchor="w", pady=(0, 40))
+        if self.logo:
+            ctk.CTkLabel(conteudo, text="", image=self.logo).pack(
+                pady=(0, 48)
+            )
+        else:
+            ctk.CTkLabel(
+                conteudo, text="Locadora TM",
+                font=(estilo.FONTE, 30, "bold"), text_color=COR_TEXTO
+            ).pack(pady=(0, 48))
 
         self.entrada_usuario = self._criar_campo(conteudo, "Usuário")
         self.entrada_senha = self._criar_campo(conteudo, "Senha", show="•")
@@ -49,7 +57,7 @@ class TelaLogin(ctk.CTkToplevel):
             conteudo,
             text="",
             font=(estilo.FONTE, 12),
-            text_color=estilo.COR_ERRO
+            text_color=COR_ERRO
         )
         self.mensagem_erro.pack(anchor="w", pady=(0, 10))
 
@@ -59,8 +67,9 @@ class TelaLogin(ctk.CTkToplevel):
             height=46,
             corner_radius=8,
             font=(estilo.FONTE, 15, "bold"),
-            fg_color=estilo.COR_PRIMARIA,
-            hover_color=estilo.COR_PRIMARIA_HOVER,
+            fg_color=COR_BOTAO,
+            hover_color=COR_BOTAO_HOVER,
+            text_color=COR_FUNDO,
             command=self.entrar
         ).pack(fill="x")
 
@@ -74,7 +83,7 @@ class TelaLogin(ctk.CTkToplevel):
             master,
             text=rotulo,
             font=(estilo.FONTE, 13),
-            text_color=estilo.COR_SUAVE
+            text_color=COR_ROTULO
         ).pack(anchor="w")
 
         campo = ctk.CTkEntry(
@@ -82,9 +91,9 @@ class TelaLogin(ctk.CTkToplevel):
             height=44,
             corner_radius=8,
             border_width=1,
-            border_color=estilo.COR_BORDA,
-            fg_color=estilo.COR_CAMPO,
-            text_color=estilo.COR_TEXTO,
+            border_color=COR_BORDA,
+            fg_color=COR_CAMPO,
+            text_color=COR_TEXTO,
             font=(estilo.FONTE, 14),
             show=show
         )
@@ -99,13 +108,13 @@ class TelaLogin(ctk.CTkToplevel):
 
     def _limpar_erro(self):
         self.mensagem_erro.configure(text="")
-        self.entrada_usuario.configure(border_color=estilo.COR_BORDA)
-        self.entrada_senha.configure(border_color=estilo.COR_BORDA)
+        self.entrada_usuario.configure(border_color=COR_BORDA)
+        self.entrada_senha.configure(border_color=COR_BORDA)
 
     def _mostrar_erro(self, texto):
         self.mensagem_erro.configure(text=texto)
-        self.entrada_usuario.configure(border_color=estilo.COR_ERRO)
-        self.entrada_senha.configure(border_color=estilo.COR_ERRO)
+        self.entrada_usuario.configure(border_color=COR_ERRO)
+        self.entrada_senha.configure(border_color=COR_ERRO)
 
     def entrar(self):
         usuario = self.entrada_usuario.get().strip()
