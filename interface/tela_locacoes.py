@@ -3,98 +3,72 @@ import customtkinter as ctk
 from tkinter import messagebox
 
 from banco.locacao_dao import LocacaoDAO
+from interface import estilo
 
 
-class TelaLocacoes(ctk.CTkToplevel):
+class TelaLocacoes(ctk.CTkFrame):
 
     def __init__(self, master):
-        super().__init__(master)
-
-        self.title("Gerenciamento de Locações")
-        self.geometry("650x650")
+        super().__init__(master, fg_color="transparent")
 
         self.dao = LocacaoDAO()
         self.clientes = {}
         self.veiculos = {}
 
-        ctk.CTkLabel(
-            self,
-            text="Gerenciamento de Locações",
-            font=("Arial", 22, "bold")
-        ).pack(pady=15)
-
-        ctk.CTkLabel(
-            self,
-            text="Selecione o cliente"
-        ).pack(pady=5)
-
-        self.menu_clientes = ctk.CTkOptionMenu(
-            self,
-            values=["Nenhum cliente"],
-            width=400
+        estilo.cabecalho(
+            self, "Locações", "Registre aluguéis e finalize devoluções."
         )
-        self.menu_clientes.pack(pady=5)
 
-        ctk.CTkLabel(
-            self,
-            text="Selecione o veículo disponível"
-        ).pack(pady=5)
+        corpo = estilo.corpo_em_colunas(self)
 
-        self.menu_veiculos = ctk.CTkOptionMenu(
-            self,
-            values=["Nenhum veículo disponível"],
-            width=400
+        nova = estilo.card(corpo)
+        nova.grid(row=0, column=0, sticky="n", padx=(0, 24))
+
+        estilo.titulo_card(nova, "Nova locação")
+        self.menu_clientes = estilo.menu(
+            nova, "Cliente", ["Nenhum cliente"]
         )
-        self.menu_veiculos.pack(pady=5)
-
-        self.entrada_dias = ctk.CTkEntry(
-            self,
-            placeholder_text="Quantidade de diárias",
-            width=400
+        self.menu_veiculos = estilo.menu(
+            nova, "Veículo disponível", ["Nenhum veículo disponível"]
         )
-        self.entrada_dias.pack(pady=15)
+        self.entrada_dias = estilo.campo(nova, "Quantidade de diárias")
+        estilo.botao_primario(
+            nova, "Registrar locação", self.registrar_locacao
+        )
 
-        ctk.CTkButton(
-            self,
-            text="Registrar Locação",
-            width=250,
-            command=self.registrar_locacao
-        ).pack(pady=5)
+        historico = estilo.card(corpo)
+        historico.grid(row=0, column=1, sticky="nsew")
 
-        ctk.CTkButton(
-            self,
-            text="Atualizar Dados",
-            width=250,
-            command=self.atualizar_dados
-        ).pack(pady=5)
+        estilo.titulo_card(historico, "Histórico de locações")
+
+        # O rodapé é empacotado antes da lista para não ser cortado.
+        rodape = ctk.CTkFrame(historico, fg_color="transparent")
+        rodape.pack(side="bottom", fill="x", padx=24, pady=(8, 20))
 
         ctk.CTkLabel(
-            self,
-            text="Histórico de Locações",
-            font=("Arial", 18, "bold")
-        ).pack(pady=10)
-
-        self.resultado = ctk.CTkTextbox(
-            self,
-            width=550,
-            height=150
-        )
-        self.resultado.pack(pady=5)
+            rodape, text="Finalizar locação",
+            font=(estilo.FONTE, 13, "bold"), text_color=estilo.COR_TEXTO
+        ).pack(side="left", padx=(0, 12))
 
         self.entrada_id = ctk.CTkEntry(
-            self,
-            placeholder_text="ID da locação para finalizar",
-            width=300
+            rodape, placeholder_text="ID", width=90, height=40,
+            corner_radius=8, border_width=1,
+            border_color=estilo.COR_BORDA, fg_color=estilo.COR_CAMPO,
+            text_color=estilo.COR_TEXTO, font=(estilo.FONTE, 13)
         )
-        self.entrada_id.pack(pady=10)
+        self.entrada_id.pack(side="left", padx=(0, 12))
 
         ctk.CTkButton(
-            self,
-            text="Finalizar Locação",
-            width=250,
+            rodape, text="Finalizar", width=120, height=40,
+            corner_radius=8, fg_color=estilo.COR_PRIMARIA,
+            hover_color=estilo.COR_PRIMARIA_HOVER,
+            font=(estilo.FONTE, 13, "bold"),
             command=self.finalizar_locacao
-        ).pack(pady=5)
+        ).pack(side="left")
 
+        self.resultado = estilo.lista(historico)
+
+    def ao_mostrar(self):
         self.atualizar_dados()
 
     def atualizar_dados(self):
@@ -159,26 +133,21 @@ class TelaLocacoes(ctk.CTkToplevel):
             self.atualizar_dados()
 
     def listar_locacoes(self):
-        self.resultado.delete("1.0", "end")
+        linhas = []
 
-        locacoes = self.dao.listar_locacoes()
-
-        if not locacoes:
-            self.resultado.insert(
-                "end", "Nenhuma locação cadastrada."
-            )
-            return
-
-        for registro in locacoes:
+        for registro in self.dao.listar_locacoes():
             id_locacao, cliente, modelo, placa, dias, valor, status = registro
 
-            self.resultado.insert(
-                "end",
-                f"ID: {id_locacao} | {status}\n"
-                f"Cliente: {cliente}\n"
-                f"Veículo: {modelo} - {placa}\n"
-                f"Diárias: {dias} | Total: R$ {valor:.2f}\n\n"
+            linhas.append(
+                f"#{id_locacao}  {cliente}  ·  {status}\n"
+                f"{modelo} ({placa})  ·  {dias} diária(s)  ·  "
+                f"R$ {valor:.2f}\n"
             )
+
+        estilo.escrever_lista(
+            self.resultado,
+            "\n".join(linhas) or "Nenhuma locação cadastrada."
+        )
 
     def finalizar_locacao(self):
         try:

@@ -53,12 +53,11 @@ class LocacaoDAO:
 
             categoria, valor_diaria = veiculo
 
-            from modelos.categorias import CarroEconomico, CarroSUV
+            from modelos.categorias import criar_veiculo
 
-            if categoria == "SUV":
-                objeto_veiculo = CarroSUV("", "", valor_diaria)
-            else:
-                objeto_veiculo = CarroEconomico("", "", valor_diaria)
+            objeto_veiculo = criar_veiculo(
+                categoria, "", "", valor_diaria
+            )
 
             valor_total = objeto_veiculo.calcular_valor(dias)
 

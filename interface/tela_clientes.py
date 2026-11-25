@@ -4,59 +4,53 @@ import sqlite3
 
 from tkinter import messagebox
 from modelos.cliente import Cliente
+from modelos.validacoes import (
+    mascara_cpf, mascara_telefone, formatar_cpf, formatar_telefone
+)
 from banco.cliente_dao import ClienteDAO
+from interface import estilo
 
 
-class TelaClientes(ctk.CTkToplevel):
+class TelaClientes(ctk.CTkFrame):
 
     def __init__(self, master):
-        super().__init__(master)
-
-        self.title("Cadastro de Clientes")
-        self.geometry("500x500")
+        super().__init__(master, fg_color="transparent")
 
         self.dao = ClienteDAO()
 
-        ctk.CTkLabel(
-            self,
-            text="Cadastro de Clientes",
-            font=("Arial", 20, "bold")
-        ).pack(pady=20)
-
-        self.entrada_nome = ctk.CTkEntry(
-            self, placeholder_text="Nome completo",
-            width=300
+        estilo.cabecalho(
+            self, "Clientes", "Cadastre e consulte os clientes da locadora."
         )
-        self.entrada_nome.pack(pady=5)
 
-        self.entrada_cpf = ctk.CTkEntry(
-            self, placeholder_text="CPF",
-            width=300
+        corpo = estilo.corpo_em_colunas(self)
+
+        formulario = estilo.card(corpo)
+        formulario.grid(row=0, column=0, sticky="n", padx=(0, 24))
+
+        estilo.titulo_card(formulario, "Novo cliente")
+        self.entrada_nome = estilo.campo(
+            formulario, "Nome completo", placeholder="Ex.: Maria Oliveira"
         )
-        self.entrada_cpf.pack(pady=5)
-
-        self.entrada_telefone = ctk.CTkEntry(
-            self, placeholder_text="Telefone",
-            width=300
+        self.entrada_cpf = estilo.campo(
+            formulario, "CPF", placeholder="000.000.000-00",
+            mascara=mascara_cpf
         )
-        self.entrada_telefone.pack(pady=5)
-
-        ctk.CTkButton(
-            self,
-            text="Cadastrar Cliente",
-            command=self.cadastrar_cliente
-        ).pack(pady=15)
-
-        ctk.CTkButton(
-            self,
-            text="Listar Clientes",
-            command=self.listar_clientes
-        ).pack(pady=5)
-
-        self.resultado = ctk.CTkTextbox(
-            self, width=420, height=150
+        self.entrada_telefone = estilo.campo(
+            formulario, "Telefone", placeholder="(00) 00000-0000",
+            mascara=mascara_telefone
         )
-        self.resultado.pack(pady=15)
+        estilo.botao_primario(
+            formulario, "Cadastrar cliente", self.cadastrar_cliente
+        )
+
+        painel_lista = estilo.card(corpo)
+        painel_lista.grid(row=0, column=1, sticky="nsew")
+
+        estilo.titulo_card(painel_lista, "Clientes cadastrados")
+        self.resultado = estilo.lista(painel_lista)
+
+    def ao_mostrar(self):
+        self.listar_clientes()
 
     def cadastrar_cliente(self):
         nome = self.entrada_nome.get().strip()
@@ -92,11 +86,14 @@ class TelaClientes(ctk.CTkToplevel):
             messagebox.showerror("Erro", str(erro))
 
     def listar_clientes(self):
-        self.resultado.delete("1.0", "end")
+        linhas = [
+            f"#{id_cliente}  {nome}\n"
+            f"CPF {formatar_cpf(cpf)}  ·  "
+            f"Tel. {formatar_telefone(telefone)}\n"
+            for id_cliente, nome, cpf, telefone in self.dao.listar()
+        ]
 
-        for id_cliente, nome, cpf, telefone in self.dao.listar():
-            self.resultado.insert(
-                "end",
-                f"ID: {id_cliente} | {nome}\n"
-                f"CPF: {cpf} | Tel: {telefone}\n\n"
-            )
+        estilo.escrever_lista(
+            self.resultado,
+            "\n".join(linhas) or "Nenhum cliente cadastrado."
+        )

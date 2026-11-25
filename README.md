@@ -12,7 +12,9 @@ O projeto tem como objetivo aplicar os principais conceitos de Programação Ori
 
 - Cadastro e listagem de clientes.
 - Cadastro e listagem de veículos.
-- Classificação de veículos nas categorias Econômico e SUV.
+- Classificação de veículos nas categorias Econômico, Sedan, SUV e Picape.
+- Validação de placa nos padrões Mercosul (ABC1D23) e antigo (ABC-1234).
+- Validação de CPF (dígitos verificadores) e telefone, com máscaras nos campos.
 - Registro de locações vinculadas a clientes e veículos.
 - Cálculo automático do valor das diárias.
 - Controle da disponibilidade dos veículos.
@@ -38,11 +40,18 @@ Foram criadas classes para representar entidades do sistema, como `Cliente`, `Ve
 
 ### Herança
 
-As classes `CarroEconomico` e `CarroSUV` herdam características e comportamentos da classe `Veiculo`.
+As classes `CarroEconomico`, `CarroSedan`, `CarroSUV` e `CarroPicape` herdam características e comportamentos da classe `Veiculo`.
 
 ### Polimorfismo
 
-As categorias de veículos possuem implementações próprias do método `calcular_valor()`, permitindo diferentes regras de cálculo conforme o tipo de veículo.
+As categorias de veículos possuem implementações próprias do método `calcular_valor()`, permitindo diferentes regras de cálculo conforme o tipo de veículo:
+
+| Categoria | Acréscimo sobre as diárias | Exemplos |
+|-----------|---------------------------|----------|
+| Econômico | 0%  | Mobi, Kwid |
+| Sedan     | 5%  | Corolla, Civic |
+| SUV       | 10% | Compass, Creta |
+| Picape    | 15% | Hilux, Toro |
 
 ### Encapsulamento
 
@@ -56,6 +65,9 @@ A classe `Locacao` relaciona objetos de clientes e veículos para representar um
 
 ```text
 locadora_veiculo/
+├── assets/
+│   └── imagens/
+│       └── logo.png
 ├── banco/
 │   ├── conexao.py
 │   ├── cliente_dao.py
@@ -71,6 +83,7 @@ locadora_veiculo/
 │   ├── categorias.py
 │   └── locacao.py
 ├── main.py
+├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
@@ -80,7 +93,7 @@ locadora_veiculo/
 ### 1. Requisitos
 
 - Python 3 instalado.
-- Biblioteca CustomTkinter instalada.
+- Bibliotecas CustomTkinter e Pillow instaladas.
 
 ### 2. Clonar o repositório
 
@@ -94,10 +107,10 @@ git clone https://github.com/TarcisioMuniz7/locadora-veiculos-poo.git
 cd locadora-veiculos-poo
 ```
 
-### 4. Instalar a biblioteca necessária
+### 4. Instalar as bibliotecas necessárias
 
 ```bash
-python -m pip install customtkinter
+python -m pip install -r requirements.txt
 ```
 
 ### 5. Executar o sistema
@@ -107,6 +120,15 @@ python main.py
 ```
 
 O banco de dados SQLite é criado automaticamente na primeira execução.
+
+### 6. Fazer login
+
+Na primeira execução, o sistema cria um usuário padrão:
+
+- **Usuário:** `admin`
+- **Senha:** `admin123`
+
+As senhas são armazenadas com hash (PBKDF2-SHA256), nunca em texto puro.
 
 ## Exemplo de funcionamento
 

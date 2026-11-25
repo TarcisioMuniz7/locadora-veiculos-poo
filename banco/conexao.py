@@ -50,7 +50,19 @@ def criar_tabelas():
             )
         """)
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario TEXT NOT NULL UNIQUE,
+                senha_hash TEXT NOT NULL,
+                sal TEXT NOT NULL
+            )
+        """)
+
         conexao.commit()
+
+    from banco.usuario_dao import UsuarioDAO
+    UsuarioDAO().criar_admin_padrao()
 
 
 if __name__ == "__main__":

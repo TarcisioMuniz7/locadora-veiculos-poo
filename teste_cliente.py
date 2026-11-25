@@ -3,7 +3,7 @@ from modelos.cliente import Cliente
 
 cliente1 = Cliente(
     "João Silva",
-    "12345678900",
+    "12345678909",
     "71999999999"
 )
 
